@@ -145,3 +145,7 @@ from qdrant_client import QdrantClient
 client = QdrantClient(host="localhost", port=6333)
 client.delete_collection(collection_name="my_collection")
 ```
+## 3. Qdrant + Text2vec 使用
+> 示例代码  
+[qdrant_text2vec_demo.py](/qdrantTool/qdrant_text2vec_demo.py)  
+>  其中包含一些数据清洗操作, 示例数据为 [test.csv](/qdrantTool/test.csv)
