@@ -19,10 +19,16 @@ USERS = {
 }
 
 # 配置文件上传目录
-UPLOAD_FOLDER = './workspace'
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# 主要存储上传的文件
+main_path = os.getenv('WORKSPACE', '/csv/workspace/')
+# 临时处理的目录
+temp_path = os.getenv('TEMP_PATH', '/csv/temp/')
+# Qdrant 服务器地址
+client_url = os.getenv('QDRANT_URL', '192.168.0.253')
+# text2text 服务地址
+text2vec_url = os.getenv('TEXT2VEC_URL', '192.168.0.253')
+
+client = QdrantClient(client_url, port=6333, timeout=3600)
 
 
 # 前端页面路由
@@ -87,7 +93,7 @@ def upload_file():
 
     # 文件保存（可根据需要修改保存路径）
     try:
-        file.save(f"./workspace/{file.filename}")
+        file.save(os.path.join(main_path, file.filename))
         return jsonify({'message': 'File uploaded successfully'}), 200
     except Exception as e:
         return jsonify({'error': f'Failed to save file: {str(e)}'}), 500
@@ -97,14 +103,14 @@ def upload_file():
 @app.route('/api/list_csv', methods=['GET'])
 def list_csv():
     # 确保上传目录存在
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    if not os.path.exists(main_path):
         return jsonify({'error': 'Upload folder does not exist'}), 404
 
     try:
         # 获取所有 .csv 文件及其最后修改时间
         csv_files_with_time = []
-        for f in os.listdir(app.config['UPLOAD_FOLDER']):
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], f)
+        for f in os.listdir(main_path):
+            file_path = os.path.join(main_path, f)
             if f.endswith('.csv') and os.path.isfile(file_path):  # 确保是文件且扩展名为 .csv
                 modification_time = os.path.getmtime(file_path)  # 获取最后修改时间
                 csv_files_with_time.append({
@@ -145,7 +151,7 @@ def delete_file():
         return jsonify({'error': '缺少文件名参数'}), 400
 
     # 构建文件路径
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    file_path = os.path.join(main_path, filename)
 
     # 检查文件是否存在
     if not os.path.exists(file_path):
@@ -180,26 +186,26 @@ def process_file():
         return jsonify({'error': '缺少文件名参数'}), 400
 
     # 构建文件路径
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    file_path = os.path.join(main_path, filename)
     if not os.path.exists(file_path):
         return jsonify({'error': f'文件 {filename} 不存在'}), 404
 
     try:
         print("开始进行文件处理")
         start_time = time.time()
-
+        print(file_path)
         # 清洗数据
         cleand_article_list = clean_work_data(file_path)
         # 存储向量数据
         upsert_articles(cleand_article_list)
-
         # 记录总耗时
         end_time = time.time()
         print(f"Total time taken: {end_time - start_time:.2f} seconds")
+        time_consuming = f"本次共耗时 : {end_time - start_time:.2f} 秒"
+        return jsonify({'result': '文件处理成功', 'time_consuming': time_consuming}), 200
     except Exception as e:
         # 捕获异常并返回错误信息
         return jsonify({'error': f'处理文件失败：{str(e)}'}), 500
-
 
 # 核心-清洗数据-1
 def clean_work_data(csv_path):
@@ -266,9 +272,9 @@ def clean_work_data(csv_path):
     # 使用时间生成文件名称
     timeTag = time.strftime("%Y%m%d%H%M%S", time.localtime())
     json_file_name = timeTag + '.json'
-    with open(workspace + json_file_name, 'w', encoding='utf-8') as f:
+    with open(temp_path + json_file_name, 'w', encoding='utf-8') as f:
         json.dump(origin_authors, f, ensure_ascii=False)
-    with open(workspace + json_file_name, 'r', encoding='utf-8') as f:
+    with open(temp_path + json_file_name, 'r', encoding='utf-8') as f:
         authors = json.load(f)
     article_list_deal = parse_json_data(authors)
 
@@ -291,7 +297,7 @@ def clean_work_data(csv_path):
             # print(e)
             count_only_ += 1
             continue
-    with open(workspace + timeTag + 'author_email.json', 'w', encoding='utf-8') as f:
+    with open(temp_path + timeTag + 'author_email.json', 'w', encoding='utf-8') as f:
         json.dump(only_author_email_list, f, ensure_ascii=False)
     if article_list_deal:  # 确保列表不为空
         article_list_deal.pop()
@@ -420,7 +426,4 @@ def to_embeddings(text):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    workspace = os.getenv('WORKSPACE', 'D:\\programWorkPlace\\zkzd2025\\')
-    client = QdrantClient("192.168.0.253", port=6333, timeout=3600)
-    text2vec_url = os.getenv('TEXT2VEC_URL', '')
+    app.run(host='0.0.0.0', port=8080)

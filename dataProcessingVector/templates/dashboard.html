@@ -118,6 +118,23 @@
         button:hover {
             background-color: #45a049;
         }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -151,6 +168,10 @@
     <div class="section">
         <h2>处理 CSV 文件</h2>
         <button onclick="processFile()" disabled id="processButton">处理文件</button>
+        <div id="processingStatus" style="margin-top: 10px; display: none;">
+            <span>正在处理，请稍候...</span>
+            <div class="spinner"></div>
+        </div>
         <div id="fileContent" style="margin-top: 10px;"></div>
     </div>
 </div>
@@ -230,23 +251,38 @@
     }
 
     // 处理文件
+    // 处理文件
     async function processFile() {
         if (!selectedFile) {
             alert('请先选择一个文件！');
             return;
         }
 
+        const processButton = document.getElementById('processButton');
+        const processingStatus = document.getElementById('processingStatus');
+        const fileContent = document.getElementById('fileContent');
+
+        // 禁用按钮并显示加载状态
+        processButton.disabled = true;
+        processingStatus.style.display = 'block';
+        fileContent.innerHTML = ''; // 清空之前的文件内容
+
         try {
             const response = await fetch(`/api/process?filename=${selectedFile}`);
             const result = await response.json();
 
             if (response.ok) {
-                document.getElementById('fileContent').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                // 显示处理结果
+                fileContent.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
             } else {
                 alert(`处理失败：${result.error}`);
             }
         } catch (error) {
             alert(`处理失败：${error.message}`);
+        } finally {
+            // 恢复按钮状态并隐藏加载状态
+            processButton.disabled = false;
+            processingStatus.style.display = 'none';
         }
     }
 
