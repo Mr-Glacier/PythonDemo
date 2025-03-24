@@ -311,10 +311,7 @@
 
     // 登出功能
     function logout() {
-        // 清除用户的登录状态（例如删除 JWT token 或清理 session）
-        localStorage.removeItem('authToken'); // 假设使用了本地存储保存认证信息
-        alert('您已成功登出！');
-        window.location.href = '/login'; // 跳转到登录页面
+       window.location.href = '/logout';
     }
 
     // 页面加载时初始化历史记录
