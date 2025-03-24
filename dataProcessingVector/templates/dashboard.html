@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV 文件管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            position: relative; /* 允许绝对定位子元素 */
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        header p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background-color: #e53935;
+        }
+
+        .container {
+            display: flex;
+            margin: 20px;
+        }
+
+        .section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+            flex: 1;
+        }
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+        .file-upload input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        .history-list {
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .history-item button:hover {
+            background-color: #e53935;
+        }
+
+        .selected {
+            background-color: #d1e7dd;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>CSV 文件管理工具</h1>
+    <p>上传、查看历史记录、处理和删除 CSV 文件</p>
+    <!-- 登出按钮 -->
+    <button class="logout-button" onclick="logout()">登出</button>
+</header>
+
+<div class="container">
+    <!-- 左侧：文件上传 -->
+    <div class="section">
+        <h2>上传 CSV 文件</h2>
+        <div class="file-upload">
+            <input type="file" id="csvFileInput" accept=".csv"/>
+            <button onclick="uploadFile()">上传文件</button>
+        </div>
+        <p id="uploadStatus"></p>
+    </div>
+
+    <!-- 中间：文件列表 -->
+    <div class="section">
+        <h2>历史上传记录</h2>
+        <div class="history-list" id="historyList">
+            <!-- 动态生成历史记录 -->
+        </div>
+    </div>
+
+    <!-- 右侧：文件处理 -->
+    <div class="section">
+        <h2>处理 CSV 文件</h2>
+        <button onclick="processFile()" disabled id="processButton">处理文件</button>
+        <div id="fileContent" style="margin-top: 10px;"></div>
+    </div>
+</div>
+
+<script>
+    // 模拟后端 API 调用
+    const API_URL = 'http://localhost:5000'; // 假设 Flask 后端运行在本地
+
+    let selectedFile = null; // 当前选中的文件名
+
+    // 上传文件
+    async function uploadFile() {
+        const fileInput = document.getElementById('csvFileInput');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('请选择一个 CSV 文件！');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`/api/upload`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                document.getElementById('uploadStatus').innerText = '文件上传成功！';
+                loadHistory(); // 刷新历史记录
+            } else {
+                document.getElementById('uploadStatus').innerText = `上传失败：${result.error}`;
+            }
+        } catch (error) {
+            document.getElementById('uploadStatus').innerText = `上传失败：${error.message}`;
+        }
+    }
+
+    // 加载历史记录
+    async function loadHistory() {
+        try {
+            const response = await fetch(`/api/list_csv`);
+            const result = await response.json();
+
+            if (response.ok) {
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = ''; // 清空旧记录
+
+                result.csv_files.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `
+              <span>${item.filename}</span>
+              <span>${item.upload_time}</span>
+              <button onclick="deleteFile('${item.filename}')">删除</button>
+            `;
+                    div.onclick = () => selectFile(div, item.filename); // 点击选择文件
+                    historyList.appendChild(div);
+                });
+            } else {
+                alert(`加载历史记录失败：${result.error}`);
+            }
+        } catch (error) {
+            alert(`加载历史记录失败：${error.message}`);
+        }
+    }
+
+    // 选择文件
+    function selectFile(element, filename) {
+        const items = document.querySelectorAll('.history-item');
+        items.forEach(item => item.classList.remove('selected')); // 移除其他文件的选中状态
+        element.classList.add('selected'); // 设置当前文件为选中状态
+        selectedFile = filename; // 更新选中的文件名
+        document.getElementById('processButton').disabled = false; // 启用处理按钮
+    }
+
+    // 处理文件
+    async function processFile() {
+        if (!selectedFile) {
+            alert('请先选择一个文件！');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/process?filename=${selectedFile}`);
+            const result = await response.json();
+
+            if (response.ok) {
+                document.getElementById('fileContent').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } else {
+                alert(`处理失败：${result.error}`);
+            }
+        } catch (error) {
+            alert(`处理失败：${error.message}`);
+        }
+    }
+
+    // 删除文件
+    async function deleteFile(filename) {
+        if (!confirm('确定要删除该文件吗？')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/delete_csv?filename=${filename}`, {
+                method: 'DELETE',
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('文件删除成功！');
+                loadHistory(); // 刷新历史记录
+            } else {
+                alert(`删除失败：${result.error}`);
+            }
+        } catch (error) {
+            alert(`删除失败：${error.message}`);
+        }
+    }
+
+    // 登出功能
+    function logout() {
+        // 清除用户的登录状态（例如删除 JWT token 或清理 session）
+        localStorage.removeItem('authToken'); // 假设使用了本地存储保存认证信息
+        alert('您已成功登出！');
+        window.location.href = '/login'; // 跳转到登录页面
+    }
+
+    // 页面加载时初始化历史记录
+    window.onload = () => {
+        loadHistory();
+    };
+</script>
+</body>
+</html>
