@@ -15,14 +15,14 @@ app = Flask(__name__)
 app.secret_key = 'YuoMNhZKgHsCu45XnEViPmEWcFZMdFTdp5ezZ6'
 # 内置账户
 USERS = {
-    "admin": "HaPsZ2CX2nah3BhsPh2s"
+    "admin": "password"
 }
 
 # 配置文件上传目录
 # 主要存储上传的文件
-main_path = os.getenv('WORKSPACE', '/csv/workspace/')
+main_path = os.getenv('WORKSPACE', 'D:\programWorkPlace\PythonDemo\dataProcessingVector\workspace')
 # 临时处理的目录
-temp_path = os.getenv('TEMP_PATH', '/csv/temp/')
+temp_path = os.getenv('TEMP_PATH', 'D:\programWorkPlace\PythonDemo\dataProcessingVector\workspace')
 # Qdrant 服务器地址
 client_url = os.getenv('QDRANT_URL', '192.168.0.253')
 # text2text 服务地址
