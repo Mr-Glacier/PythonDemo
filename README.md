@@ -8,4 +8,5 @@ Used to record relevant python demo codes
 
 ## DEMO-2 : <a href="qdrantTool/README.md" target="_blank">Qdrant Tool Usage</a>
 
-## DEMO-3 : <a href="dataProcessing/README.md" target="_blank">Data Processing Vector</a>
+
+## DEMO-3 : <a href="dataProcessingVector/README.md" target="_blank">Data Processing Vector</a>
