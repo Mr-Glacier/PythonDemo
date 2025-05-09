@@ -13,3 +13,7 @@
 -  向量数据导入数据处理平台,用于处理上传的固定格式 .csv文件
 
 <img src="./images/dataProcessing-home.png" alt="dataProcessingVector" style="zoom:50%;" />
+
+## DEMO-4 : <a href="paddleocr/README.md" target="_blank">PaddleOCR</a>
+- Thanks for [paddleocr](https://paddlepaddle.github.io/PaddleOCR/latest/quick_start.html)
+- 用于构建使用paddleocr的API服务提供端
