@@ -1,15 +1,15 @@
 # PythonDemo
-Used to record relevant python demo codes
-> Author: [Mr-Glacier](https://github.com/Mr-Glacier)
+- Used to record relevant python demo codes
+> Author : [Mr-Glacier](https://github.com/Mr-Glacier)
 
 ## DEMO-1 : <a href="text2vec/README.md" target="_blank">Text2vec</a>
-> Thanks for [text2vec](https://github.com/shibing624/text2vec)  
-> 用于构建使用text2vec模型的API服务提供端
+- Thanks for [text2vec](https://github.com/shibing624/text2vec)  
+- 用于构建使用text2vec模型的API服务提供端
 
 ## DEMO-2 : <a href="qdrantTool/README.md" target="_blank">Qdrant Tool Usage</a>
-> 用于记录Qdrant的使用方法
+- 用于记录Qdrant的使用方法
 
 ## DEMO-3 : <a href="dataProcessingVector/README.md" target="_blank">Data Processing Vector</a>
->  向量数据导入数据处理平台,用于处理上传的固定格式 .csv文件
+-  向量数据导入数据处理平台,用于处理上传的固定格式 .csv文件
 
 <img src="./images/dataProcessing-home.png" alt="dataProcessingVector" style="zoom:50%;" />
