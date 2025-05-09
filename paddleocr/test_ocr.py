@@ -5,7 +5,7 @@ import requests
 def request_structure(api_url, file_path):
     """
     请求 /structure 接口
-    :param api_url: API 的 URL (例如 http://127.0.0.1:8000/structure)
+    :param api_url: API 的 URL (例如 http://127.0.0.1:3000/structure)
     :param file_path: 本地图片文件路径
     :return: 响应内容
     """
@@ -18,7 +18,7 @@ def request_structure(api_url, file_path):
 def request_ocr(api_url, file_path):
     """
     请求 /ocr 接口
-    :param api_url: API 的 URL (例如 http://127.0.0.1:8000/ocr)
+    :param api_url: API 的 URL (例如 http://127.0.0.1:3000/ocr)
     :param file_path: 本地图片文件路径
     :return: 响应内容
     """
@@ -31,8 +31,8 @@ def request_ocr(api_url, file_path):
 # 使用示例
 if __name__ == "__main__":
     # 替换为实际的 API 地址
-    structure_api_url = "http://223.0.12.108:8300/structure"
-    ocr_api_url = "http://223.0.12.108:8300/ocr"
+    structure_api_url = "http://127.0.0.1:3000/structure"
+    ocr_api_url = "http://127.0.0.1:3000/ocr"
 
     # 替换为实际的图片文件路径
     image_file_path = "/images/dataProcessing-home.png"
