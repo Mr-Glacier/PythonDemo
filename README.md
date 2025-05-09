@@ -17,3 +17,5 @@
 ## DEMO-4 : <a href="paddleocr/README.md" target="_blank">PaddleOCR</a>
 - Thanks for [paddleocr](https://paddlepaddle.github.io/PaddleOCR/latest/quick_start.html)
 - 用于构建使用paddleocr的API服务提供端
+
+<img src="./images/paddleOCR.png" alt="paddleocr" style="zoom:50%;">
