@@ -7,6 +7,9 @@ Used to record relevant python demo codes
 > 用于构建使用text2vec模型的API服务提供端
 
 ## DEMO-2 : <a href="qdrantTool/README.md" target="_blank">Qdrant Tool Usage</a>
-
+> 用于记录Qdrant的使用方法
 
 ## DEMO-3 : <a href="dataProcessingVector/README.md" target="_blank">Data Processing Vector</a>
+>  向量数据导入数据处理平台,用于处理上传的固定格式 .csv文件
+
+<img src="./images/dataProcessing-home.png" alt="dataProcessingVector" style="zoom:50%;" />
