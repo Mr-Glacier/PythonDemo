@@ -1,3 +1,5 @@
+import os
+
 import pika
 import json
 import time
@@ -8,21 +10,22 @@ from DistributedCrawlers.minio_storage import MinioStorage
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-RABBITMQ_HOST = "192.168.0.105"
-RABBITMQ_PORT = 30779
-RABBITMQ_USER = "admin"
-RABBITMQ_PASS = "admin123"
+# RabbitMQ 配置（支持环境变量）
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "192.168.0.105")
+RABBITMQ_PORT = int(os.getenv("RABBITMQ_PORT", 30779))
+RABBITMQ_USER = os.getenv("RABBITMQ_USER", "admin")
+RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "admin123")
 
 # 任务类型- 品牌 \ 车型 \ 版本
 TASK_QUEUES = ["Brand", "Model", "Version"]
 
-# MinIO 配置
+# MinIO 配置（支持环境变量）
 MINIO_CONF = {
-    "endpoint": "192.168.0.105:31521",
-    "access_key": "admin",
-    "secret_key": "admin123",
-    "bucket_name": "yiche",
-    "secure": False
+    "endpoint": os.getenv("MINIO_ENDPOINT", "192.168.0.105:31521"),
+    "access_key": os.getenv("MINIO_ACCESS_KEY", "admin"),
+    "secret_key": os.getenv("MINIO_SECRET_KEY", "admin123"),
+    "bucket_name": os.getenv("MINIO_BUCKET_NAME", "yiche"),
+    "secure": os.getenv("MINIO_SECURE", "false").lower() in ("true", "1", "yes")
 }
 
 
@@ -65,20 +68,24 @@ def process_model_info(msg, date_flag, minio_storage):
         api_data
     )
     if result != "Error":
-        minio_storage.upload_bytes(result.encode("utf-8"), f"{date_flag}/model/{msg.get('model_id')}.json")
+        minio_storage.upload_bytes(result.encode("utf-8"), f"{date_flag}/Model/{msg.get('model_id')}.json")
         return True
     return False
 
 
 def process_version_info(msg, date_flag, minio_storage):
-    """处理版本配置信息"""
-    api_data = json.dumps({"modelId": str(msg.get("model_id"))})
+    """处理版本配置信息
+    cityId : 201 北京
+    https://mhapi.yiche.com/hcar/h_car/api/v1/param/get_param_details?cid=508&param=%7B%22carIds%22%3A%22167742%2C167743%22%2C%22cityId%22%3A%222501%22%7D
+    """
+    api_data = json.dumps({"carIds": str(msg.get("version_ids")), " ": "201"})
     result = method_request_api(
-        "https://mapi.yiche.com/web_api/car_model_api/api/v1/model/get_model_info",
+        "https://mhapi.yiche.com/hcar/h_car/api/v1/param/get_param_details",
         api_data
     )
     if result != "Error":
-        minio_storage.upload_bytes(result.encode("utf-8"), f"{date_flag}/Model/{msg.get('model_id')}.json")
+        minio_storage.upload_bytes(result.encode("utf-8"),
+                                   f"{date_flag}/Version/{msg.get('version_ids').replace(',', '_')}.json")
         return True
     return False
 
@@ -86,7 +93,7 @@ def process_version_info(msg, date_flag, minio_storage):
 # 队列与处理函数的映射
 TASK_HANDLERS = {
     "Brand": process_brand_info,
-    "Series": process_model_info,
+    "Model": process_model_info,
     "Version": process_version_info
 }
 

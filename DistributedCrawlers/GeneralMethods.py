@@ -150,3 +150,23 @@ def method_mq_clear(connection_params: pika.ConnectionParameters, queue_name):
     print(f"[调度中心] 队列 '{queue_name}' 已清空")
 
     connection.close()
+
+
+def check_queue_empty(connection_params: pika.ConnectionParameters, queue_name: str) -> bool:
+    """
+    检测指定队列是否已完成（无消息）
+    :param connection_params: RabbitMQ 连接参数
+    :param queue_name: 队列名称
+    :return: True 如果队列为空（任务完成），否则 False
+    """
+    connection = pika.BlockingConnection(connection_params)
+    channel = connection.channel()
+
+    method_frame = channel.queue_declare(queue=queue_name, passive=True)
+    message_count = method_frame.method.message_count
+
+    print(f"[调度中心] 队列 '{queue_name}' 剩余消息数: {message_count}")
+
+    connection.close()
+    return message_count == 0
+

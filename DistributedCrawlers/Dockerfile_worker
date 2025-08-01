@@ -1,0 +1,25 @@
+# 1. 使用轻量 Python 基础镜像
+FROM python:3.11-slim
+
+# 2. 设置时区（可选）
+ENV TZ=Asia/Shanghai
+
+# 3. 安装系统依赖（如果 requests 需要 SSL 支持等）
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# 4. 设置工作目录
+WORKDIR /app
+
+# 5. 先复制 requirements.txt 并安装依赖（利用 Docker 缓存）
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 6. 复制项目代码
+COPY . .
+
+# 7. 入口命令（直接运行你的消费者脚本）
+CMD ["python", "worker_node.py"]
