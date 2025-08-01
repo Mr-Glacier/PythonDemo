@@ -175,7 +175,12 @@ def method_version(date_flag):
 
 if __name__ == '__main__':
     # 日期标识
-    date_flag = "20210801"
+    date_flag = "20210802"
+
+    # 记录开始时间
+    start_time = time.time()
+    print(f"【任务启动】时间: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
     # 1. 推送每个品牌的任务
     method_brand(date_flag)
 
@@ -189,7 +194,7 @@ if __name__ == '__main__':
             time.sleep(30)
 
     # 推送每个车型的任务
-    # method_factory_modules(date_flag)
+    method_factory_modules(date_flag)
     while True:
         if check_queue_empty(params, "Model"):
             print("Model 队列已处理完毕，开始推送 Version 队列")
@@ -205,3 +210,16 @@ if __name__ == '__main__':
         else:
             print("Model 队列尚未清空，继续等待 30 秒...")
             time.sleep(30)
+    # 🎉 全部完成，计算总耗时
+    end_time = time.time()
+    total_seconds = end_time - start_time
+
+
+    def format_duration(seconds):
+        h = int(seconds // 3600)
+        m = int((seconds % 3600) // 60)
+        s = int(seconds % 60)
+        return f"{h:02d}小时 {m:02d}分钟 {s:02d}秒"
+
+
+    print(f"【任务完成】耗时: {format_duration(total_seconds)}")
