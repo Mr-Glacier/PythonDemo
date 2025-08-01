@@ -5,14 +5,14 @@ import json
 import time
 import logging
 import traceback
-from DistributedCrawlers.GeneralMethods import method_request_api
-from DistributedCrawlers.minio_storage import MinioStorage
+from GeneralMethods import method_request_api
+from minio_storage import MinioStorage
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 # RabbitMQ 配置（支持环境变量）
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "192.168.0.105")
-RABBITMQ_PORT = int(os.getenv("RABBITMQ_PORT", 30779))
+RABBITMQ_PORT = os.getenv("RABBITMQ_PORT", 30779)
 RABBITMQ_USER = os.getenv("RABBITMQ_USER", "admin")
 RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "admin123")
 
