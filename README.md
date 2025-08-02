@@ -26,7 +26,7 @@
 
 <img src="./images/paddleOCR.png" alt="paddleocr" style="zoom:50%;">
 
-## DEMO-4 : <a href="/DistributedCrawler/README.md" target="_blank">DistributedCrawler</a>
+## DEMO-4 : <a href="DistributedCrawlers/README.md" target="_blank">DistributedCrawler</a>
 
 - 分布式爬虫, 基于MQ 消息队列进行消息分发,minio 进行数据存储
 - 一个任务调度中心
