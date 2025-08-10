@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>流式大模型聊天</title>
+  <style>
+    body {
+      max-width: 600px;
+      margin: 40px auto;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      padding: 0 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 80px;
+      font-size: 16px;
+      padding: 10px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    #chat {
+      margin-top: 30px;
+      white-space: pre-wrap;
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 8px;
+      min-height: 200px;
+      overflow-y: auto;
+      max-height: 400px;
+      box-shadow: inset 0 0 5px #ddd;
+    }
+    .user {
+      background-color: #d1e7ff;
+      text-align: right;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+    }
+    .assistant {
+      background-color: #f0f0f0;
+      text-align: left;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      padding: 8px 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>流式大模型聊天</h1>
+  <textarea id="input" placeholder="请输入问题"></textarea><br />
+  <button id="sendBtn">发送</button>
+
+  <div id="chat"></div>
+
+  <script>
+    const sendBtn = document.getElementById('sendBtn');
+    const input = document.getElementById('input');
+    const chat = document.getElementById('chat');
+
+    let chatHistory = [];
+
+    function renderChat() {
+      chat.innerHTML = '';
+      chatHistory.forEach(({ role, content }) => {
+        const msgDiv = document.createElement('div');
+        msgDiv.textContent = content;
+        msgDiv.className = role === 'user' ? 'user' : 'assistant';
+        chat.appendChild(msgDiv);
+      });
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    sendBtn.onclick = async () => {
+      const question = input.value.trim();
+      if (!question) {
+        alert('请输入内容');
+        return;
+      }
+
+      chatHistory.push({ role: 'user', content: question });
+      renderChat();
+
+      input.value = '';
+      sendBtn.disabled = true;
+
+      // 先占位一条空的 assistant 消息
+      chatHistory.push({ role: 'assistant', content: '' });
+      renderChat();
+
+      try {
+        const response = await fetch('/api/chat-stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: chatHistory }),
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+
+        let buffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // 可能是未完整的一行，留到下次处理
+
+          for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+
+            // SSE 格式通常是 "data: {...}"
+            if (line.startsWith('data:')) {
+              const dataStr = line.replace(/^data:\s*/, '');
+              if (dataStr === '[DONE]') {
+                break; // 流结束
+              }
+              try {
+                const dataObj = JSON.parse(dataStr);
+                const delta = dataObj.choices?.[0]?.delta?.content;
+                if (delta) {
+                  chatHistory[chatHistory.length - 1].content += delta;
+                  renderChat();
+                }
+              } catch (err) {
+                console.error('解析流数据出错', err, line);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        chatHistory[chatHistory.length - 1].content += `\n[错误] ${err.message}`;
+        renderChat();
+      } finally {
+        sendBtn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>

@@ -3,17 +3,22 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Login Page</title>
+    <title>ETU-Chat - Login</title>
     <!-- Bootstrap CSS -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="icon" href="/static/ETU.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
     <style>
         body {
             height: 100vh;
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(-45deg, #004080, #0066cc, #004080, #0066cc);
-            background-size: 400% 400%;
-            animation: gradientBG 20s ease infinite;
+            background-image: linear-gradient(-45deg, #001f3d, #003366, #0074e4, #00aaff, #00ffd1, #a0f0ff),
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.15), transparent 70%),
+            radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.1), transparent 60%);
+            background-size: 400% 400%, 100% 100%, 100% 100%;
+            background-repeat: no-repeat;
+            animation: gradientBG 18s ease-in-out infinite;
+            filter: brightness(1.05) saturate(1.2);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,18 +26,24 @@
 
         @keyframes gradientBG {
             0% {
-                background-position: 0% 50%;
+                background-position: 0% 50%, 0% 0%, 100% 100%;
+            }
+            25% {
+                background-position: 50% 20%, 10% 10%, 90% 90%;
             }
             50% {
-                background-position: 100% 50%;
+                background-position: 100% 50%, 20% 20%, 80% 80%;
+            }
+            75% {
+                background-position: 50% 80%, 10% 30%, 90% 70%;
             }
             100% {
-                background-position: 0% 50%;
+                background-position: 0% 50%, 0% 0%, 100% 100%;
             }
         }
 
         .login-container {
-            background: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.85);
             border-radius: 1rem;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
             padding: 3rem 3.5rem;

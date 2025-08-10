@@ -1,5 +1,6 @@
 from typing import Optional
 
+import httpx
 import uvicorn
 from fastapi import FastAPI, Request, Form, Depends, HTTPException, status, Response, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -8,12 +9,12 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
+from starlette.responses import StreamingResponse
 from starlette.staticfiles import StaticFiles
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
 
 SECRET_KEY = "your-secret-jwt-key"
 ALGORITHM = "HS256"
@@ -117,6 +118,38 @@ async def about(request: Request, token: str = Cookie(default=None)):
         except HTTPException:
             user = None
     return templates.TemplateResponse("about.html", {"request": request, "user": user})
+
+
+@app.get("/chat")
+async def chat_page(request: Request):
+    return templates.TemplateResponse("chat.html", {"request": request, "msg": ""})
+
+
+@app.post("/api/chat-stream")
+async def chat_stream(request: Request):
+    data = await request.json()
+    messages = data.get("messages", [])
+
+    headers = {
+        "Authorization": f"Bearer 123",
+        "Content-Type": "application/json",
+    }
+    json_data = {
+        "model": "qwen3-32b",
+        "messages": messages,
+        "stream": True
+    }
+
+    async def event_generator():
+        async with httpx.AsyncClient(timeout=None) as client:
+            async with client.stream("POST", "http://127.0.0.1:8005/v1/chat/completions",
+                                     headers=headers, json=json_data) as response:
+                async for chunk in response.aiter_bytes():
+                    if chunk:
+                        yield chunk
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
 
 if __name__ == '__main__':
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
