@@ -8,14 +8,12 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
     <style>
         body {
-            height: 100vh; /* 用视口高度，确保高度准确 */
+            height: 100vh;
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(-45deg, #004080, #0066cc, #004080, #0066cc);
             background-size: 400% 400%;
             animation: gradientBG 20s ease infinite;
-
-            /* 使用 Flexbox 完全居中 */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -37,24 +35,38 @@
             background: rgba(255, 255, 255, 0.65);
             border-radius: 1rem;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            padding: 2.5rem 3rem;
-            width: 340px;
+            padding: 3rem 3.5rem;
+            width: 400px;
             max-width: 90vw;
             text-align: center;
             backdrop-filter: saturate(180%) blur(8px);
             -webkit-backdrop-filter: saturate(180%) blur(8px);
             transition: background 0.3s ease;
-
-            /* 防止容器太高撑破屏幕，且居中更稳 */
             max-height: 90vh;
             overflow-y: auto;
         }
 
-        /* 悬浮时背景变更清晰 */
+        @media (max-width: 600px) {
+            .login-container {
+                width: 90vw;
+                padding: 2rem;
+            }
+            .login-header {
+                flex-direction: column;
+                align-items: center;
+            }
+            .login-header img {
+                height: 40px;
+            }
+            .form-row label {
+                min-width: auto;
+                margin-bottom: 0.5rem;
+            }
+        }
+
         .login-container:hover {
             background: rgba(255, 255, 255, 0.8);
         }
-
 
         .login-header {
             display: flex;
@@ -63,36 +75,48 @@
             margin-bottom: 1.8rem;
             color: #007bff;
             font-weight: 700;
-            font-size: 1.8rem;
+            font-size: 2rem;
             user-select: none;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+            gap: 0.7rem;
+            transition: color 0.3s ease;
         }
 
         .login-header img {
-            width: 36px;
-            height: 36px;
-            margin-right: 0.6rem;
+            width: auto;
+            height: 50px;
             object-fit: contain;
             flex-shrink: 0;
+            transition: transform 0.3s ease;
+            cursor: default;
         }
 
-        .form-group label {
-            font-weight: 600;
-            color: #333;
+        .login-header:hover img {
+            transform: scale(1.2);
         }
 
-        .form-control {
-            border-radius: 0.5rem;
-            border: 1.5px solid #80d0c7;
-            transition: border-color 0.3s ease;
+        .login-header:hover {
+            color: #004ca4;
         }
 
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 6px #007bffaa;
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .alert-placeholder {
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
         }
 
         .btn-primary {
             width: 100%;
+            max-width: 200px;
+            margin-left: auto;
+            margin-right: auto;
             border-radius: 0.6rem;
             background: linear-gradient(45deg, #007bff, #00c6ff);
             border: none;
@@ -100,34 +124,40 @@
             font-size: 1.1rem;
             transition: background 0.4s ease;
         }
-
-        .btn-primary:hover {
-            background: linear-gradient(45deg, #0056b3, #0093e9);
-        }
-
-        .alert-placeholder {
-            margin-bottom: 1rem;
-            display: none;
-        }
     </style>
 </head>
 <body>
 <div class="login-container">
     <div class="login-header">
         <!-- 这里替换为你的图片地址 -->
-        <img src="your-icon.png" alt="Logo"/>
-        ETU
+        <img src="../static/images/ETU_Logo.png" alt="Logo"/>
+        ETU-Chat
     </div>
     <form id="loginForm" novalidate>
         <div class="alert alert-danger alert-placeholder" role="alert" id="alertMsg"></div>
-        <div class="form-group text-left">
-            <label for="username">Username</label>
-            <input type="text" class="form-control" id="username" required autocomplete="username"/>
+
+        <!-- 用户名行 -->
+        <div class="form-row align-items-center">
+            <label for="username" class="col-auto mb-0 font-weight-bold">账户</label>
+            <div class="col">
+                <input type="text" class="form-control" id="username" required autocomplete="username"/>
+            </div>
         </div>
-        <div class="form-group text-left">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" required autocomplete="current-password"/>
+
+        <!-- 密码行 -->
+        <div class="form-row align-items-center">
+            <label for="password" class="col-auto mb-0 font-weight-bold">密码</label>
+            <div class="col input-group">
+                <input type="password" class="form-control" id="password" required autocomplete="current-password"/>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary btn-toggle-pass" type="button" tabindex="-1"
+                            aria-label="Toggle password visibility">
+                        👁️
+                    </button>
+                </div>
+            </div>
         </div>
+
         <button type="submit" class="btn btn-primary mt-3">Login</button>
     </form>
 </div>
@@ -139,6 +169,17 @@
 <script>
     const form = document.getElementById('loginForm');
     const alertMsg = document.getElementById('alertMsg');
+
+    document.querySelector('.btn-toggle-pass').addEventListener('click', function () {
+        const pwdInput = document.getElementById('password');
+        if (pwdInput.type === 'password') {
+            pwdInput.type = 'text';
+            this.textContent = '🙈';
+        } else {
+            pwdInput.type = 'password';
+            this.textContent = '👁️';
+        }
+    });
 
     form.addEventListener('submit', function (event) {
         event.preventDefault();
