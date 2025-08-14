@@ -13,7 +13,6 @@
             href="https://cdn.jsdelivr.net/npm/highlight.js/styles/github.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/highlight.js/lib/common.min.js"></script>
-
     <style>
         /* 全局字体优化 */
         body {
@@ -62,6 +61,9 @@
         }
 
         #historyHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 16px;
             font-weight: 700;
             font-size: 18px;
@@ -374,7 +376,10 @@
 <div id="app">
     <!-- 左侧历史列表 -->
     <div id="historyPanel">
-        <div id="historyHeader">历史会话</div>
+        <div id="historyHeader">
+            历史会话
+            <button id="newChatBtn">新会话</button>
+        </div>
         <div id="historyList"></div>
     </div>
 

@@ -142,7 +142,7 @@ async def chat_stream(request: Request):
 
     async def event_generator():
         async with httpx.AsyncClient(timeout=None) as client:
-            async with client.stream("POST", "http://127.0.0.1:8005/v1/chat/completions",
+            async with client.stream("POST", "http://223.0.12.108:8005/v1/chat/completions",
                                      headers=headers, json=json_data) as response:
                 async for chunk in response.aiter_bytes():
                     if chunk:

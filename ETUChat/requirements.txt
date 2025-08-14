@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+deepdoc-pdfparser
+python-docx
+python-pptx
+openpyxl
+pandas
+pyyaml
+beautifulsoup4
+lxml
+Pillow
+pytesseract
+markdown
