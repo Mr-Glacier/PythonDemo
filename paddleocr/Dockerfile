@@ -1,4 +1,3 @@
-# 使用指定的基础镜像
 FROM paddlepaddle/paddle:3.0.0-gpu-cuda12.6-cudnn9.5-trt10.5
 
 # 设置工作目录
@@ -12,15 +11,8 @@ COPY . .
 # 设置清华源为 pip 镜像源
 RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
-# 安装所需的 Python 包
-RUN pip install  paddleocr \
-    && pip install fastapi \
-    && pip install requests \
-    && pip install  uvicorn \
-    && pip install  python-multipart
-
-# 暴露端口
-EXPOSE 3000
+# 安装 Python 依赖
+RUN pip install --no-cache-dir -r requirements.txt
 
 # 运行 Python 脚本
 CMD ["python", "ocr_interface.py"]
